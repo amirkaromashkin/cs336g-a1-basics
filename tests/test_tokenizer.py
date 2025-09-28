@@ -209,7 +209,6 @@ def test_roundtrip_unicode_string_with_special_tokens():
     test_string = "Héllò hôw <|endoftext|><|endoftext|> are ü? 🙃<|endoftext|>"
     encoded_ids = tokenizer.encode(test_string)
     tokenized_string = [tokenizer.decode([x]) for x in encoded_ids]
-    # Ensure the special <|endoftext|> token is preserved
     assert tokenized_string.count("<|endoftext|>") == 3
 
     decoded_string = tokenizer.decode(encoded_ids)
@@ -420,6 +419,23 @@ def test_encode_iterable_tinystories_matches_tiktoken():
     assert tokenizer.decode(all_ids) == corpus_contents
     assert reference_tokenizer.decode(reference_ids) == corpus_contents
 
+def test_manual_test():
+    reference_tokenizer = tiktoken.get_encoding("gpt2")
+    tokenizer = get_tokenizer_from_vocab_merges_path(
+        vocab_path=VOCAB_PATH,
+        merges_path=MERGES_PATH,
+    )
+    test_string = "Liberty"
+
+    reference_ids = reference_tokenizer.encode(test_string)
+    ids = tokenizer.encode(test_string)
+    # print("Reference Tokens:", [reference_tokenizer.decode([x]) for x in reference_ids])
+    # print("Actual Tokens:", [tokenizer.decode([x]) for x in ids])
+    
+    assert ids == reference_ids
+
+    assert tokenizer.decode(ids) == test_string
+    assert reference_tokenizer.decode(reference_ids) == test_string
 
 @pytest.mark.skipif(
     not sys.platform.startswith("linux"),
